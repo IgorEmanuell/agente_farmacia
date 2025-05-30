@@ -1,0 +1,36 @@
+# Configuration for the Pharmacy AI Agent
+
+# Evolution API Settings
+evolution_api:
+  base_url: "http://localhost:8080" # Replace with your Evolution API instance URL
+  api_key: "YOUR_EVOLUTION_API_KEY" # Replace with your Evolution API Key
+  instance_name: "default" # Replace with your Evolution API instance name
+  webhook_verify_token: "YOUR_WEBHOOK_VERIFY_TOKEN" # Optional: Token to verify webhook requests
+
+# Database Settings
+database:
+  url: "sqlite+aiosqlite:///./data/farmacia.db" # Database connection URL (using async SQLite driver)
+  # Example for PostgreSQL (async):
+  # url: "postgresql+asyncpg://user:password@host:port/database"
+
+# Agent Logic Settings
+agent:
+  pharmacy_name: "Farmácia Exemplo"
+  default_response_language: "pt_BR"
+  # AI Model Configuration (Example for OpenAI - to be implemented later)
+  ai_provider: "none" # Options: none, openai, gemini, claude, etc.
+  openai:
+    api_key: "YOUR_OPENAI_API_KEY"
+    model: "gpt-3.5-turbo"
+  # Add configurations for other providers as needed
+
+# Logging Settings
+logging:
+  level: "INFO"
+
+# Server Settings (Uvicorn)
+server:
+  host: "0.0.0.0"
+  port: 8000
+  reload: false # Set to true for development hot-reloading (requires manual uvicorn run)
+

@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+sqlalchemy[asyncio]
+aiosqlite
+asyncpg # For async PostgreSQL later, if needed
+psycopg2-binary # For sync PostgreSQL later, if needed
+python-dotenv
+requests
+pyyaml
+loguru
+alembic
+# Add other dependencies as needed, e.g., for fuzzy search, specific AI APIs
+

@@ -1,0 +1,45 @@
+## Lista de Tarefas: Agente IA para Atendimento de Farmácia
+
+- [x] **Passo 1: Criar Estrutura Base do Projeto**
+    - [x] Criar diretórios principais (`src`, `config`, `data`)
+    - [x] Criar ficheiro `todo.md`
+    - [x] Criar ficheiro `README.md`
+    - [x] Criar ficheiro `.gitignore`
+    - [x] Criar ficheiro `requirements.txt` com dependências iniciais
+    - [x] Criar ficheiro de configuração `config/config.yaml` (placeholder)
+    - [x] Criar ficheiro `src/main.py` (estrutura FastAPI básica)
+    - [x] Criar ficheiro `src/database.py` (placeholder)
+    - [x] Criar ficheiro `src/evolution_api.py` (placeholder)
+    - [x] Criar ficheiro `src/agent_logic.py` (placeholder)
+- [x] **Passo 2: Configurar Ambiente Dockerizado**
+    - [x] Criar `Dockerfile`
+    - [x] Criar `docker-compose.yml`
+    - [-] Testar build e execução do container (Bloqueado: Docker indisponível no ambiente)
+- [x] **Passo 3: Implementar Receção de Mensagens (Evolution API)**
+    - [x] Definir endpoint webhook em FastAPI (`/webhook/evolution`)
+    - [x] Implementar lógica para receber e validar mensagens (POST)
+    - [x] Processar tipos de mensagem (texto, opcionalmente áudio/imagem depois)
+    - [x] Extrair dados relevantes (remetente, conteúdo)
+    - [x] Adicionar logging básico para mensagens recebidas
+- [x] **Passo 4: Criar Base de Dados e Modelos**
+    - [x] Configurar conexão com SQLite (via SQLAlchemy async)
+    - [x] Definir modelo `Produto` (nome, categoria, preço, estoque, exige_receita)
+    - [x] Definir modelo `Reserva` (cliente, produto_id, quantidade, timestamp, status)
+    - [x] Criar tabelas na base de dados
+    - [x] Implementar funções CRUD básicas para Produtos (para popular dados iniciais)
+    - [x] Implementar função para criar Reservas
+- [x] **Passo 5: Implementar Lógica de Resposta Básica**
+    - [x] Implementar função de consulta de produtos na base de dados (fuzzy search opcional, começar com busca exata/parcial)
+    - [x] Integrar consulta de produtos na lógica do webhook
+    - [x] Implementar lógica para verificar estoque e necessidade de receita
+    - [x] Implementar lógica para criar reservas quando solicitado
+    - [x] Gerar respostas de texto simples (sem IA por enquanto)
+    - [x] Implementar envio de resposta via Evolution API (POST request)
+- [x] **Passo 9: Validar Funcionalidades Essenciais**
+    - [x] Popular base de dados com alguns produtos de exemplo
+    - [ ] Testar envio de mensagem via simulador/cliente WhatsApp
+    - [ ] Verificar receção e processamento no webhook
+    - [ ] Testar consulta de produto (existente/inexistente)
+    - [ ] Testar informação de estoque e receita
+    - [ ] Testar criação de reserva
+    - [ ] Verificar resposta enviada de volta ao cliente

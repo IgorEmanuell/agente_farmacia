@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: farmacia_agente_ia_app
+    ports:
+      # Map host port 8000 to container port 8000 (defined in Dockerfile/config)
+      - "8000:8000"
+    volumes:
+      # Mount the source code for potential hot-reloading (if enabled in uvicorn)
+      # Note: Hot-reloading is generally for development, not production.
+      - ./src:/app/src
+      # Mount config file
+      - ./config:/app/config
+      # Mount data volume for persistent data (like SQLite DB)
+      - ./data:/app/data
+      # Mount logs volume
+      - ./logs:/app/logs
+    # Environment variables can be loaded from a .env file
+    # env_file:
+    #   - .env
+    # Example environment variables (if not using .env or need overrides)
+    # environment:
+    #   - EVOLUTION_API_KEY=YOUR_KEY_HERE # Example, better use .env
+    restart: unless-stopped
+
+# Define volumes if needed for persistence beyond bind mounts
+# volumes:
+#   farmacia_data:
+#   farmacia_logs:
+
