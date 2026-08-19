@@ -53,15 +53,15 @@ async def handle_evolution_webhook(payload: dict):
         if "conversation" in message_info and message_info["conversation"]:
             message_type = "text"
             text_content = message_info["conversation"]
-            logger.info(f"Message Type: {message_type}, Content: 
+            logger.info(f"""Message Type: {message_type}, Content: 
 {text_content}
-")
+""")
         elif "extendedTextMessage" in message_info and message_info["extendedTextMessage"].get("text"):
             message_type = "text"
             text_content = message_info["extendedTextMessage"]["text"]
-            logger.info(f"Message Type: extendedText, Content: 
+            logger.info(f"""Message Type: extendedText, Content: 
 {text_content}
-")
+""")
         elif "audioMessage" in message_info:
             message_type = "audio"
             logger.info("Message Type: audio (Handling not implemented yet)")
