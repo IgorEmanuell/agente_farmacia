@@ -48,3 +48,10 @@ farmacia_agente_ia/
 └── todo.md             # Lista de tarefas do desenvolvimento
 ```
 
+
+### Exportação de Dados
+
+Para exportar a base de dados SQLite para CSV, execute:
+```bash
+python src/export_data.py
+```
