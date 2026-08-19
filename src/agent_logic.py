@@ -52,17 +52,15 @@ def extract_product_and_quantity(text: str, intent: str) -> tuple[str | None, in
     if text:
         product_name = text
 
-    logger.debug(f"Extracted Product: 
-{product_name}
-, Quantity: {quantity}")
+    logger.debug(f"Extracted Product: {product_name}, Quantity: {quantity}")
     return product_name, quantity
 
 # --- Main message processing logic --- #
 async def process_text_message(sender_jid: str, text: str) -> str:
     """Processes an incoming text message, interacts with DB, and determines the response."""
-    logger.info(f"Processing text message from {sender_jid}: 
+    logger.info(f"""Processing text message from {sender_jid}: 
 {text}
-")
+""")
     response_text = f"Desculpe, não entendi o que quis dizer. Pode tentar reformular? Para ajuda, diga 'ajuda'." # Default error/fallback
     lower_text = text.lower()
 
@@ -78,9 +76,7 @@ async def process_text_message(sender_jid: str, text: str) -> str:
                 else:
                     product = await get_product_by_name(db_session, product_name)
                     if not product:
-                        response_text = f"Desculpe, não encontrei nenhum produto parecido com 
-{product_name}
- para reservar."
+                        response_text = f"Desculpe, não encontrei nenhum produto parecido com {product_name} para reservar."
                     else:
                         try:
                             reservation_data = {
@@ -104,9 +100,7 @@ async def process_text_message(sender_jid: str, text: str) -> str:
                 else:
                     product = await get_product_by_name(db_session, product_name)
                     if not product:
-                        response_text = f"Desculpe, não encontrei nenhum produto parecido com 
-{product_name}
-."
+                        response_text = f"Desculpe, não encontrei nenhum produto parecido com {product_name}."
                     else:
                         response_text = f"Sim, temos {product.nome}. "
                         if product.preco:
@@ -127,9 +121,7 @@ async def process_text_message(sender_jid: str, text: str) -> str:
                 else:
                     product = await get_product_by_name(db_session, product_name)
                     if not product:
-                        response_text = f"Desculpe, não encontrei nenhum produto parecido com 
-{product_name}
-."
+                        response_text = f"Desculpe, não encontrei nenhum produto parecido com {product_name}."
                     elif product.exige_receita:
                         response_text = f"Sim, {product.nome} **exige receita médica** para ser comprado."
                     else:
