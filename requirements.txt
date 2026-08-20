@@ -5,7 +5,7 @@ aiosqlite
 asyncpg # For async PostgreSQL later, if needed
 psycopg2-binary # For sync PostgreSQL later, if needed
 python-dotenv
-requests
+httpx
 pyyaml
 loguru
 alembic

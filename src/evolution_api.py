@@ -1,5 +1,5 @@
 # src/evolution_api.py
-import requests
+import httpx
 import yaml
 from loguru import logger
 
@@ -28,6 +28,27 @@ HEADERS = {
     "Content-Type": "application/json"
 }
 
+# Shared async HTTP client (created once, reused across requests)
+_http_client: httpx.AsyncClient | None = None
+
+
+async def get_http_client() -> httpx.AsyncClient:
+    """Returns a shared async HTTP client instance."""
+    global _http_client
+    if _http_client is None or _http_client.is_closed:
+        _http_client = httpx.AsyncClient(headers=HEADERS, timeout=10.0)
+    return _http_client
+
+
+async def close_http_client():
+    """Closes the shared HTTP client. Call on application shutdown."""
+    global _http_client
+    if _http_client is not None and not _http_client.is_closed:
+        await _http_client.aclose()
+        _http_client = None
+        logger.info("HTTP client closed.")
+
+
 async def handle_evolution_webhook(payload: dict):
     """Processes incoming webhook messages from Evolution API."""
     logger.info(f"Handling webhook event: {payload.get('event')}")
@@ -53,15 +74,11 @@ async def handle_evolution_webhook(payload: dict):
         if "conversation" in message_info and message_info["conversation"]:
             message_type = "text"
             text_content = message_info["conversation"]
-            logger.info(f"""Message Type: {message_type}, Content: 
-{text_content}
-""")
+            logger.info(f"Message Type: {message_type}, Content: {text_content}")
         elif "extendedTextMessage" in message_info and message_info["extendedTextMessage"].get("text"):
             message_type = "text"
             text_content = message_info["extendedTextMessage"]["text"]
-            logger.info(f"""Message Type: extendedText, Content: 
-{text_content}
-""")
+            logger.info(f"Message Type: extendedText, Content: {text_content}")
         elif "audioMessage" in message_info:
             message_type = "audio"
             logger.info("Message Type: audio (Handling not implemented yet)")
@@ -94,7 +111,7 @@ async def handle_evolution_webhook(payload: dict):
         logger.info(f"Ignoring event type '{payload.get('event')}' or message from self.")
 
 async def send_text_message(recipient_jid: str, message: str):
-    """Sends a text message via the Evolution API."""
+    """Sends a text message via the Evolution API using async httpx."""
     if not API_KEY:
         logger.error("Evolution API Key is not configured. Cannot send message.")
         return None # Return None to indicate failure
@@ -116,21 +133,23 @@ async def send_text_message(recipient_jid: str, message: str):
 
     try:
         logger.info(f"Sending message to {recipient_jid}: {message}")
-        response = requests.post(endpoint, json=payload, headers=HEADERS, timeout=10) # Added timeout
-        response.raise_for_status() # Raise an exception for bad status codes (4xx or 5xx)
+        client = await get_http_client()
+        response = await client.post(endpoint, json=payload)
+        response.raise_for_status()
         response_data = response.json()
         logger.debug(f"Evolution API response: {response_data}")
         logger.info(f"Message sent successfully to {recipient_jid}.")
         return response_data
-    except requests.exceptions.Timeout:
+    except httpx.TimeoutException:
         logger.error(f"Timeout sending message via Evolution API to {recipient_jid}")
         return None
-    except requests.exceptions.RequestException as e:
+    except httpx.HTTPStatusError as e:
+        logger.error(f"HTTP error sending message via Evolution API: {e}")
+        logger.error(f"Response status: {e.response.status_code}")
+        logger.error(f"Response text: {e.response.text}")
+        return None
+    except httpx.RequestError as e:
         logger.error(f"Error sending message via Evolution API: {e}")
-        if e.response is not None:
-            logger.error(f"Response status: {e.response.status_code}")
-            logger.error(f"Response text: {e.response.text}")
         return None
 
 # Placeholder for other Evolution API interactions (e.g., sending media)
-
