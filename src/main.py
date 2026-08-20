@@ -1,14 +1,16 @@
 # src/main.py
 import yaml
-from fastapi import FastAPI, Request, HTTPException, Depends, Header
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Request, HTTPException, Header
 from loguru import logger
 import uvicorn
 from typing import Optional
+from datetime import datetime, timezone
 
 # Import necessary components from other modules
-from .database import init_db # Assuming init_db will be called on startup
-from .evolution_api import handle_evolution_webhook, WEBHOOK_VERIFY_TOKEN
-# from .config import Settings # If using Pydantic settings later
+from .database import init_db
+from .evolution_api import handle_evolution_webhook, WEBHOOK_VERIFY_TOKEN, close_http_client
+
 
 # Load configuration (simple approach for now)
 try:
@@ -25,22 +27,46 @@ except yaml.YAMLError as e:
 log_level = config.get("logging", {}).get("level", "INFO")
 logger.add("logs/app.log", rotation="10 MB", level=log_level)
 
-app = FastAPI(title="Farmácia AI Agent", version="0.1.0")
+# Track startup time for health check
+_startup_time: datetime | None = None
 
-@app.on_event("startup")
-async def startup_event():
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manages application startup and shutdown lifecycle."""
+    global _startup_time
     logger.info("Starting Farmácia AI Agent API...")
-    # Initialize database connection and create tables if they don't exist
     await init_db()
+    _startup_time = datetime.now(timezone.utc)
     logger.info("API Started and Database Initialized (Tables created if needed).")
-
-@app.on_event("shutdown")
-def shutdown_event():
+    yield
+    # Shutdown
     logger.info("Shutting down Farmácia AI Agent API...")
+    await close_http_client()
+    logger.info("Shutdown complete.")
+
+
+app = FastAPI(
+    title="Farmácia AI Agent",
+    version="0.2.0",
+    lifespan=lifespan,
+)
+
 
 @app.get("/")
 async def read_root():
     return {"message": f"Welcome to the {config.get('agent', {}).get('pharmacy_name', 'Farmácia')} AI Agent API"}
+
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for monitoring and container orchestration."""
+    return {
+        "status": "healthy",
+        "version": "0.2.0",
+        "uptime_since": _startup_time.isoformat() if _startup_time else None,
+    }
+
 
 # Evolution API Webhook Endpoint
 @app.post("/webhook/evolution")
@@ -84,4 +110,3 @@ async def evolution_webhook(request: Request, x_webhook_verify_token: Optional[s
 #         port=server_config.get("port", 8000),
 #         reload=True # Enable reload for local development
 #     )
-
